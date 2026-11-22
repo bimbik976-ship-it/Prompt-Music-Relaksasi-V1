@@ -1,0 +1,132 @@
+import React, { useState } from 'react';
+import { Music, CheckCircle2, AlertCircle, Sparkles, Download, Smartphone } from 'lucide-react';
+import { usePWAInstall } from '../hooks/usePWA';
+import { BATCH_SIZE } from '../config/batch';
+
+interface HeaderProps {
+  activeKeysCount: number;
+  routingMode: string;
+  completedCount: number;
+  batchNumber: number;
+  onOpenQC: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  activeKeysCount,
+  routingMode,
+  completedCount,
+  batchNumber,
+  onOpenQC,
+}) => {
+  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const [showIOSPrompt, setShowIOSPrompt] = useState(false);
+  const isApiReady = activeKeysCount > 0;
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-[#342544] bg-[#171025]/95 backdrop-blur-md">
+      <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        {/* Brand identity */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.18)]">
+            <Music className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white">
+                PETA PIANO AI
+              </h1>
+              <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/25">
+                AI V1.0
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 hidden sm:block">
+              Suno Instrumental Piano Prompt Architect
+            </p>
+          </div>
+        </div>
+
+        {/* Status Badges & Controls */}
+        <div className="flex items-center gap-2">
+          {/* API Status Badge */}
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+              isApiReady
+                ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400'
+                : 'bg-rose-950/40 border-rose-500/30 text-rose-300'
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                isApiReady ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+              }`}
+            />
+            <span className="font-semibold">{isApiReady ? 'API SIAP' : 'API BELUM SIAP'}</span>
+            <span className="text-[10px] text-slate-400 hidden md:inline">
+              ({activeKeysCount} Kunci | {routingMode})
+            </span>
+          </div>
+
+          {/* Batch Progress Mini-badge */}
+          <div className="hidden xs:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono bg-[#241A35] border border-[#403052] text-slate-300">
+            <span className="text-violet-400 font-bold">{Math.min(completedCount, BATCH_SIZE)}</span>
+            <span className="text-slate-500">/{BATCH_SIZE}</span>
+          </div>
+
+          {/* Diagnostics / QC Quick Button */}
+          <button
+            onClick={onOpenQC}
+            title="Quality Control & System Diagnostics"
+            className="p-1.5 rounded-lg bg-[#241A35] border border-[#403052] text-slate-300 hover:text-violet-400 hover:border-violet-500/30 transition text-xs flex items-center gap-1"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            <span className="hidden sm:inline text-[11px]">QC</span>
+          </button>
+
+          {/* PWA Install Button */}
+          {isInstallable && (
+            <button
+              onClick={install}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500 hover:bg-violet-400 text-black text-xs font-bold transition shadow-[0_0_15px_rgba(139,92,246,0.25)]"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
+
+          {isIOS && !isInstalled && (
+            <button
+              onClick={() => setShowIOSPrompt(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#403052] text-[11px] text-slate-400 hover:text-slate-200"
+            >
+              <Smartphone className="w-3 h-3" />
+              <span>iOS App</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* iOS Install Instructions Modal */}
+      {showIOSPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-[#2b2040] border border-[#403052] p-5 shadow-2xl text-slate-200">
+            <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-violet-400" />
+              Pasang di iPhone / iPad
+            </h3>
+            <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+              1. Buka halaman ini di browser <strong>Safari</strong>.<br />
+              2. Tekan tombol <strong>Share</strong> (ikon kotak bertanda panah ke atas).<br />
+              3. Gulir ke bawah lalu pilih <strong>Add to Home Screen</strong> (Tambah ke Layar Utama).
+            </p>
+            <button
+              onClick={() => setShowIOSPrompt(false)}
+              className="w-full py-2 rounded-xl bg-violet-500 text-black font-semibold text-xs hover:bg-violet-400 transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
